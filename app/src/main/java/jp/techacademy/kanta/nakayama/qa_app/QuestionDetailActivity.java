@@ -15,8 +15,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class QuestionDetailActivity extends AppCompatActivity {
     private ListView mListView;
@@ -27,6 +30,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
     //ひとまずテスト用のfavoriteButtonを作成します
     private Button favoriteButton;
+    private ArrayList<String> favoriteAnswerList=new ArrayList();
 
     private ChildEventListener mEventListener=new ChildEventListener() {
         @Override
@@ -48,6 +52,38 @@ public class QuestionDetailActivity extends AppCompatActivity {
             Answer answer=new Answer(body,name,uid,answerUid);
             mQuestion.getAnswers().add(answer);
             mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+        }
+    };
+
+    private ChildEventListener mFavoriteEventListener=new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            HashMap map=(HashMap)dataSnapshot.getValue();
+            HashMap favoriteAnswerMap=(HashMap)map.get("favorite");
+            if(favoriteAnswerMap!=null){
+                for(Object key:favoriteAnswerMap.keySet()){
+                    HashMap temp=(HashMap)favoriteAnswerMap.get((String)key);
+                    String favoriteAnswerName=(String)temp.get("favoriteAnswer");
+                    favoriteAnswerList.add((String)favoriteAnswerName);
+                }
+            }
+
         }
 
         @Override
@@ -93,8 +129,24 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
                 //ログイン済みのユーザーを取得
                 FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+
+                //現在の質問のuidを取得しHashMapに放り込む
+                Map<String,String> favoriteAnswer=new HashMap<String,String>();
+                favoriteAnswer.put("favoriteAnswer",mQuestion.getQuestionUid());
+
+                //ログイン済みユーザーのfavoriteスペースを指定
                 DatabaseReference favoriteRef=databaseReference.child(Const.UsersPATH).child(user.getUid()).child(Const.FavoritePATH);
-                
+                DatabaseReference testRef=databaseReference.child(Const.UsersPATH);
+
+                testRef.addChildEventListener(mFavoriteEventListener);
+
+                for(int i=0;i<favoriteAnswerList.size();i++){
+                    if(favoriteAnswerList.get(i).equals(favoriteAnswer)){
+                        return;
+                    }else{
+                        favoriteRef.push().setValue(favoriteAnswer);
+                    }
+                }
             }
         });
 
@@ -121,5 +173,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
         DatabaseReference dataBaseReference= FirebaseDatabase.getInstance().getReference();
         mAnswerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
+
+        DatabaseReference testRef=dataBaseReference.child(Const.UsersPATH);
+        testRef.addChildEventListener(mFavoriteEventListener);
     }
 }
