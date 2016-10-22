@@ -30,7 +30,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
     //ひとまずテスト用のfavoriteButtonを作成します
     private Button favoriteButton;
-    private ArrayList<String> favoriteAnswerList=new ArrayList();
+    private ArrayList<String> favoriteAnswerList;
 
     private ChildEventListener mEventListener=new ChildEventListener() {
         @Override
@@ -121,6 +121,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
 
         //favoriteButtonの準備
+        favoriteAnswerList=new ArrayList();
         favoriteButton=(Button)findViewById(R.id.favoriteButton);
         favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,12 +141,18 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
                 testRef.addChildEventListener(mFavoriteEventListener);
 
+                boolean test=true;
                 for(int i=0;i<favoriteAnswerList.size();i++){
-                    if(favoriteAnswerList.get(i).equals(favoriteAnswer)){
-                        return;
-                    }else{
-                        favoriteRef.push().setValue(favoriteAnswer);
+                    if(favoriteAnswerList.get(i).equals(mQuestion.getQuestionUid())){
+                        favoriteAnswerList.remove(i);
+                        test=false;
                     }
+                }
+                if(test) {
+                    favoriteRef.push().setValue(favoriteAnswer);
+                }else{
+                    //favorite(firebase)から要素を除外する
+                    //favoriteRef.
                 }
             }
         });
