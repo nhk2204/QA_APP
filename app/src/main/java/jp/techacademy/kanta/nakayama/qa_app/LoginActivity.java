@@ -54,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
         //アカウントの作成処理のリスナー
         mCreateAccountListener=new OnCompleteListener<AuthResult>(){
             @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
+            public void onComplete(Task<AuthResult> task) {
                 if(task.isSuccessful()){
                     //成功した場合
                     //ログインを行う
@@ -76,7 +76,7 @@ public class LoginActivity extends AppCompatActivity {
         //ログイン処理のリスナー
         mLoginListener=new OnCompleteListener<AuthResult>(){
             @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
+            public void onComplete(Task<AuthResult> task) {
                 if(task.isSuccessful()){
                     //成功した場合
                     //User情報だけはFireBaseに専用のクラスが用意されている

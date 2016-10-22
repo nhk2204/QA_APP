@@ -110,7 +110,7 @@ public class QuestionSendActivity extends AppCompatActivity implements View.OnCl
 
             Bitmap resizedImage=Bitmap.createBitmap(image,0,0,imageWidth,imageHeight,matrix,true);
 
-            //BitmapをImageView煮設定する
+            //BitmapをImageViewに設定する
             mImageView.setImageBitmap(resizedImage);
 
             mPictureUri=null;

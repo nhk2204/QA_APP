@@ -28,7 +28,7 @@ public class SettingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
 
-        //Preference殻表示名を取得してEditTextに反映させる。
+        //Preferenceから表示名を取得してEditTextに反映させる。
         SharedPreferences sp= PreferenceManager.getDefaultSharedPreferences(this);
         String name=sp.getString(Const.NameKEY,"");
         EditText nameText=(EditText)findViewById(R.id.nameText);

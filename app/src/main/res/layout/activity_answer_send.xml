@@ -29,6 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="投稿"
+        android:id="@+id/sendButton"
         android:background="@drawable/custom_button"
         android:textColor="@color/colorButtonText"
         android:layout_below="@+id/answerEditText"

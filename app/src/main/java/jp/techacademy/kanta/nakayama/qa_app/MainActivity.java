@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //ジャンルを選択していない場合(mGenre==)はエラーを表示する
+                //ジャンルを選択していない場合(mGenre==0)はエラーを表示する
                 if(mGenre==0){
                     Snackbar.make(view,"ジャンルを選択してください",Snackbar.LENGTH_LONG).show();
                     return;

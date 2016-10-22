@@ -5,6 +5,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +24,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private QuestionDetailListAdapter mAdapter;
 
     private DatabaseReference mAnswerRef;
+
+    //ひとまずテスト用のfavoriteButtonを作成します
+    private Button favoriteButton;
 
     private ChildEventListener mEventListener=new ChildEventListener() {
         @Override
@@ -80,10 +84,24 @@ public class QuestionDetailActivity extends AppCompatActivity {
         mListView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
 
+        //favoriteButtonの準備
+        favoriteButton=(Button)findViewById(R.id.favoriteButton);
+        favoriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //FirebaseからReferenceを取得
+                DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
+                //ログイン済みのユーザーを取得
+                FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+                DatabaseReference favoriteRef=databaseReference.child(Const.UsersPATH).child(user.getUid()).child(Const.FavoritePATH);
+                
+            }
+        });
+
         FloatingActionButton fab=(FloatingActionButton)findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 //ログイン済みのユーザーを収録する
                 FirebaseUser user= FirebaseAuth.getInstance().getCurrentUser();
 
