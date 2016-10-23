@@ -138,11 +138,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
         //favoriteRef.removeEventListener(mFavoriteEventListener);
         //favoriteRef.addChildEventListener(mFavoriteEventListener);
         //誤作動をしないようmFavoriteListenerを忘れずにはずす。
-        if(favoriteAnswerList!=null) {
-            favoriteRef.removeEventListener(mFavoriteEventListener);
-        }else{
+        //if(favoriteAnswerList.size()!=0) {
+            //favoriteRef.removeEventListener(mFavoriteEventListener);
+        //}else{
             favoriteRef.addChildEventListener(mFavoriteEventListener);
-        }
+        //}
 
         //favoriteButtonの準備
         favoriteButton=(Button)findViewById(R.id.favoriteButton);
@@ -171,7 +171,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
         //よくわからない集団。
         //DatabaseReference dataBaseReference= FirebaseDatabase.getInstance().getReference();
         //mAnswerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
-        //mAnswerRef.addChildEventListener(mEventListener);
+        mAnswerRef.addChildEventListener(mEventListener);
         //DatabaseReference testRef=dataBaseReference.child(Const.UsersPATH);
         //testRef.addChildEventListener(mFavoriteEventListener);
     }
@@ -207,16 +207,17 @@ public class QuestionDetailActivity extends AppCompatActivity {
             //(Firebaseのデータから）
             if(test) {
                 favoriteAnswerList.clear();
-                if(favoriteAnswerList!=null) {
-                    favoriteRef.removeEventListener(mFavoriteEventListener);
-                }else{
+                //if(favoriteAnswerList.size()!=0) {
+                    //favoriteRef.removeEventListener(mFavoriteEventListener);
+                //}else{
                     favoriteRef.addChildEventListener(mFavoriteEventListener);
-                }
+                //}
                 favoriteRef.push().setValue(favoriteAnswer);
+                //favoriteRef.addChildEventListener(mFavoriteEventListener);
             }else{
                 //favorite(firebase)から要素を除外する
-                favoriteRef.child(deleteAnswerUid).removeValue();
                 favoriteRef.removeEventListener(mFavoriteEventListener);
+                favoriteRef.child(deleteAnswerUid).removeValue();
             }
         }
     };
