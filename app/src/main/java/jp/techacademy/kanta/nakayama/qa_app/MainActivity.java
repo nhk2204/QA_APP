@@ -187,11 +187,15 @@ public class MainActivity extends AppCompatActivity {
                 mAdapter.setQuestionArrayList(mQuestionArrayList);
                 mListView.setAdapter(mAdapter);
 
-                //選択したジャンルにリスナーを登録する
+                //選択したジャンルのデータをクローズして再度ジャンルを読み込む準備をする。
                 if(mGenreRef!=null){
+                    //データの初期化
                     mGenreRef.removeEventListener(mEventListener);
                 }
+                //データベースのルートを示している。
+                //持ってくる場所をセット。mGenreRefに場所を登録
                 mGenreRef=mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
+                //データを持ってくるよう命ずる。
                 mGenreRef.addChildEventListener(mEventListener);
 
                 return true;
@@ -199,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Firebase
+        //Firebaseを使う準備をする
         mDatabaseReference= FirebaseDatabase.getInstance().getReference();
 
         //ListViewの準備

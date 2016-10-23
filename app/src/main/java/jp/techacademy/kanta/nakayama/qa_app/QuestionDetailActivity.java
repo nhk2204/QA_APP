@@ -72,10 +72,12 @@ public class QuestionDetailActivity extends AppCompatActivity {
     };
 
     private ChildEventListener mFavoriteEventListener=new ChildEventListener() {
+        //onCreateする際に呼ばれます。
+        //ArrayListの中にFavoriteAnswerを挿入します。
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            HashMap map=(HashMap)dataSnapshot.getValue();
-            HashMap favoriteAnswerMap=(HashMap)map.get("favorite");
+            HashMap favoriteAnswerMap=(HashMap)dataSnapshot.getValue();
+            //HashMap favoriteAnswerMap=(HashMap)map.get("favorite");
             if(favoriteAnswerMap!=null){
                 for(Object key:favoriteAnswerMap.keySet()){
                     HashMap temp=(HashMap)favoriteAnswerMap.get((String)key);
@@ -83,7 +85,6 @@ public class QuestionDetailActivity extends AppCompatActivity {
                     favoriteAnswerList.add((String)favoriteAnswerName);
                 }
             }
-
         }
 
         @Override
@@ -120,42 +121,28 @@ public class QuestionDetailActivity extends AppCompatActivity {
         mListView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
 
-        //favoriteButtonの準備
+
+        //favoriteListの作成
         favoriteAnswerList=new ArrayList();
+        //FirebaseからReferenceを取得
+        DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
+        //ログイン済みのユーザーを取得
+        FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference favoriteRef=databaseReference.child(Const.UsersPATH).child(user.getUid()).child(Const.FavoritePATH);
+
+        //誤作動をしないようmFavoriteListenerを忘れずにはずす。
+        //favoriteRef.removeEventListener(mFavoriteEventListener);
+        //favoriteRef.addChildEventListener(mFavoriteEventListener);
+        //誤作動をしないようmFavoriteListenerを忘れずにはずす。
+        if(favoriteAnswerList!=null) {
+            favoriteRef.removeEventListener(mFavoriteEventListener);
+        }else{
+            favoriteRef.addChildEventListener(mFavoriteEventListener);
+        }
+
+        //favoriteButtonの準備
         favoriteButton=(Button)findViewById(R.id.favoriteButton);
-        favoriteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //FirebaseからReferenceを取得
-                DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
-                //ログイン済みのユーザーを取得
-                FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
-
-                //現在の質問のuidを取得しHashMapに放り込む
-                Map<String,String> favoriteAnswer=new HashMap<String,String>();
-                favoriteAnswer.put("favoriteAnswer",mQuestion.getQuestionUid());
-
-                //ログイン済みユーザーのfavoriteスペースを指定
-                DatabaseReference favoriteRef=databaseReference.child(Const.UsersPATH).child(user.getUid()).child(Const.FavoritePATH);
-                DatabaseReference testRef=databaseReference.child(Const.UsersPATH);
-
-                testRef.addChildEventListener(mFavoriteEventListener);
-
-                boolean test=true;
-                for(int i=0;i<favoriteAnswerList.size();i++){
-                    if(favoriteAnswerList.get(i).equals(mQuestion.getQuestionUid())){
-                        favoriteAnswerList.remove(i);
-                        test=false;
-                    }
-                }
-                if(test) {
-                    favoriteRef.push().setValue(favoriteAnswer);
-                }else{
-                    //favorite(firebase)から要素を除外する
-                    //favoriteRef.
-                }
-            }
-        });
+        favoriteButton.setOnClickListener(favoriteButtonListener);
 
         FloatingActionButton fab=(FloatingActionButton)findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -177,11 +164,49 @@ public class QuestionDetailActivity extends AppCompatActivity {
             }
         });
 
-        DatabaseReference dataBaseReference= FirebaseDatabase.getInstance().getReference();
-        mAnswerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
-        mAnswerRef.addChildEventListener(mEventListener);
-
-        DatabaseReference testRef=dataBaseReference.child(Const.UsersPATH);
-        testRef.addChildEventListener(mFavoriteEventListener);
+        //よくわからない集団。
+        //DatabaseReference dataBaseReference= FirebaseDatabase.getInstance().getReference();
+        //mAnswerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
+        //mAnswerRef.addChildEventListener(mEventListener);
+        //DatabaseReference testRef=dataBaseReference.child(Const.UsersPATH);
+        //testRef.addChildEventListener(mFavoriteEventListener);
     }
+
+    View.OnClickListener favoriteButtonListener= new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //FirebaseからReferenceを取得
+            DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
+            //ログイン済みのユーザーを取得
+            FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+
+            //現在の質問のuidを取得しHashMapに放り込む
+            Map<String,String> favoriteAnswer=new HashMap<String,String>();
+            favoriteAnswer.put("favoriteAnswer",mQuestion.getQuestionUid());
+
+            //ログイン済みユーザーのfavoriteスペースを指定
+            DatabaseReference favoriteRef=databaseReference.child(Const.UsersPATH).child(user.getUid()).child(Const.FavoritePATH);
+            DatabaseReference testRef=databaseReference.child(Const.UsersPATH);
+
+            //favoriteAnswerList内に該当するQuestionUidがあるかどうかを確認
+            boolean test=true;
+            for(int i=0;i<favoriteAnswerList.size();i++){
+                if(favoriteAnswerList.get(i).equals(mQuestion.getQuestionUid())){
+                    //ある場合はfavoriteAnswerListから除外する
+                    favoriteAnswerList.remove(i);
+                    test=false;
+                }
+            }
+            //testがtrueの場合はお気に入りに追加、falseの場合はお気に入りから除外する。
+            //(Firebaseのデータから）
+            if(test) {
+                favoriteAnswerList.add(mQuestion.getQuestionUid());
+                favoriteRef.push().setValue(favoriteAnswer);
+            }else{
+                //favorite(firebase)から要素を除外する
+                
+            }
+        }
+    };
 }
+
