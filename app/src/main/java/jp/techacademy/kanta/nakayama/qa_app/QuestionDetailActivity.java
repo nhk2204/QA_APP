@@ -30,7 +30,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
     //ひとまずテスト用のfavoriteButtonを作成します
     private Button favoriteButton;
-    private ArrayList<String> favoriteAnswerList;
+    private ArrayList<favoriteQuestion> favoriteAnswerList;
 
     private ChildEventListener mEventListener=new ChildEventListener() {
         @Override
@@ -78,11 +78,15 @@ public class QuestionDetailActivity extends AppCompatActivity {
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
             HashMap favoriteAnswerMap=(HashMap)dataSnapshot.getValue();
             //HashMap favoriteAnswerMap=(HashMap)map.get("favorite");
+            favoriteQuestion favoriteQuestion=new favoriteQuestion();
             if(favoriteAnswerMap!=null){
                 for(Object key:favoriteAnswerMap.keySet()){
                     HashMap temp=(HashMap)favoriteAnswerMap.get((String)key);
                     String favoriteAnswerName=(String)temp.get("favoriteAnswer");
-                    favoriteAnswerList.add((String)favoriteAnswerName);
+                    String favoriteUid=(String)key;
+                    favoriteQuestion.setAnswerName(favoriteAnswerName);
+                    favoriteQuestion.setAnswerUid(favoriteUid);
+                    favoriteAnswerList.add(favoriteQuestion);
                 }
             }
         }
@@ -190,9 +194,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
             //favoriteAnswerList内に該当するQuestionUidがあるかどうかを確認
             boolean test=true;
+            String deleteAnswerUid="";
             for(int i=0;i<favoriteAnswerList.size();i++){
-                if(favoriteAnswerList.get(i).equals(mQuestion.getQuestionUid())){
+                if(favoriteAnswerList.get(i).getAnswerName().equals(mQuestion.getQuestionUid())){
                     //ある場合はfavoriteAnswerListから除外する
+                    deleteAnswerUid=favoriteAnswerList.get(i).getAnswerUid();
                     favoriteAnswerList.remove(i);
                     test=false;
                 }
@@ -200,11 +206,17 @@ public class QuestionDetailActivity extends AppCompatActivity {
             //testがtrueの場合はお気に入りに追加、falseの場合はお気に入りから除外する。
             //(Firebaseのデータから）
             if(test) {
-                favoriteAnswerList.add(mQuestion.getQuestionUid());
+                favoriteAnswerList.clear();
+                if(favoriteAnswerList!=null) {
+                    favoriteRef.removeEventListener(mFavoriteEventListener);
+                }else{
+                    favoriteRef.addChildEventListener(mFavoriteEventListener);
+                }
                 favoriteRef.push().setValue(favoriteAnswer);
             }else{
                 //favorite(firebase)から要素を除外する
-                
+                favoriteRef.child(deleteAnswerUid).removeValue();
+                favoriteRef.removeEventListener(mFavoriteEventListener);
             }
         }
     };
