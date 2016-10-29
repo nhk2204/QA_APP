@@ -86,7 +86,9 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
 
-                        Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
+                        //Questionの引数のGenreをNowGenreに変更
+                        //コレするくらいならGenreをそもそも更新したほうがいい気もする・・・
+                        Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), NowGenre, bytes, answerArrayList);
                         mQuestionArrayList.add(question);
                         mAdapter.notifyDataSetChanged();
                     }

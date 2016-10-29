@@ -37,6 +37,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
     //String NowRef : お気に入りのRefを直接代入する
     private DatabaseReference NowRef;
 
+    //無理やり動かすためにbooleanを追加
+    private boolean flagA;
+
     //質問自体のRefを保存する。
     //コレ自体を比較することでお気に入りか否かの判別を行い、MainActivityにてお気に入りリストを作成する場合も
     //コレを用いて直接呼び出す。
@@ -91,6 +94,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
             //お気に入りの数を数えていることを確認する。
             System.out.println("There are " + dataSnapshot.getChildrenCount() + " favorites posts");
 
+            //無理やり動かすためのflagAを定義
+            flagA=false;
+
             // お気に入りの数分、下記の処理を実行する
             //dataSnapshot.getChildren()ができるなら、dataSnapshotのidを引っ張ることもできるのではないだろうか・・・？
             for( DataSnapshot snapshot: dataSnapshot.getChildren() )
@@ -108,13 +114,28 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
                     NowRef=snapshot.getRef();
                     // お気に入りボタンの状態を変更
-                    favoriteButton.setText("お気に入り（済み）");
+                    favoriteButton.setText("お気に入り質問");
+                    favoriteButton.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.btn_star_big_on, 0, 0, 0);
                     // お気に入りボタンにタグを１（何でも構わない）とし、登録済みと判定できるようにする。
                     favoriteButton.setTag("1");
+                    //ループを抜けます
+                    //なぜかbreak出来ない。意味がわからない。
+                    //break;
+
+                    //デフォルトをお気に入りに追加されていない状態にし、お気に入りへの追加があった場合のみ変更の動作を行わせる。
+                    //flagAをtrueにすることで130行目以降の暴発を防ぐ。
+                    //そもそもbreakが使えればこんなことはしなくていいのだが、本当に意味がわからない。
+                    /*
+                    flagA=true;
+
                     // 選択された質問がお気に入りに追加されていない場合
                 } else {
-                    favoriteButton.setText("お気に入り");
-                    favoriteButton.setTag("0");
+                    if(flagA!=true) {
+                        favoriteButton.setText("お気に入りに追加する");
+                        favoriteButton.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.btn_star_big_off, 0, 0, 0);
+                        favoriteButton.setTag("0");
+                    }
+                    */
                 }
                 //お気に入りボタンを押した際の条件分岐はタグで判断する。
                 //タグとは？
@@ -224,6 +245,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
         mAnswerRef.addChildEventListener(mEventListener);
         //DatabaseReference testRef=dataBaseReference.child(Const.UsersPATH);
         //testRef.addChildEventListener(mFavoriteEventListener);
+
+        //ボタンのデフォルト設定をお気に入りに追加されていない状態にする。
+        favoriteButton.setText("お気に入りに追加する");
+        favoriteButton.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.btn_star_big_off, 0, 0, 0);
+        favoriteButton.setTag("0");
     }
 
     View.OnClickListener favoriteButtonListener= new View.OnClickListener() {
@@ -254,13 +280,14 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 }
             }
             */
-            //お気に入りに入っているか田舎の判別用のArrayListを削除した。
+            //お気に入りに入っているか否かの判別用のArrayListを削除した。
             //ボタンにつけられているタグでお気に入りの質問か否かを判別する。
             if(favoriteButton.getTag().toString().equals("1")){
                 //tag:1の場合お気に入りの質問
                 //行う動作：お気に入りから除外
                 NowRef.removeValue();
-                favoriteButton.setText("お気に入り");
+                favoriteButton.setText("お気に入りに追加する");
+                favoriteButton.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.btn_star_big_off, 0, 0, 0);
                 favoriteButton.setTag("0");
             }else{
                 //tag:0(1以外）の場合お気に入りの質問でない

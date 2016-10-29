@@ -22,7 +22,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/favoriteButton"
         android:tag="0"
-        android:text="お気に入り"/>
+        android:text="お気に入り"
+        android:drawableLeft="@android:drawable/btn_star_big_on"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
