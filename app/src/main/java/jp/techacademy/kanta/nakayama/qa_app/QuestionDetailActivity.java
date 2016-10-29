@@ -30,7 +30,12 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
     //ひとまずテスト用のfavoriteButtonを作成します
     private Button favoriteButton;
-    private ArrayList<favoriteQuestion> favoriteAnswerList;
+
+    //favoriteAnswerList(ArrayList)を消去
+    //private ArrayList<favoriteQuestion> favoriteAnswerList;
+
+    //String NowRef : お気に入りのRefを直接代入する
+    private DatabaseReference NowRef;
 
     private ChildEventListener mEventListener=new ChildEventListener() {
         @Override
@@ -86,13 +91,17 @@ public class QuestionDetailActivity extends AppCompatActivity {
             for( DataSnapshot snapshot: dataSnapshot.getChildren() )
             {
                 favoriteButton=(Button)findViewById(R.id.favoriteButton);
+                System.out.println("There are " + snapshot.getRef().toString() + " : getRef()");
                 // 選択された質問がお気に入りに追加されていた場合
                 if( mQuestion.getQuestionUid().equals(snapshot.getValue()))
                 {
-                    System.out.println("There are " + snapshot.getValue() + " : getValue()");
+                    /*
+                    System.out.println("There are " + snapshot.getValue().toString() + " : getValue()");
                     System.out.println("There are " + snapshot.getKey() + " : getKey()");
                     System.out.println("There are " + snapshot.toString() + " : toString()");
+                    */
 
+                    NowRef=snapshot.getRef();
                     // お気に入りボタンの状態を変更
                     favoriteButton.setText("お気に入り（済み）");
                     // お気に入りボタンにタグを１（何でも構わない）とし、登録済みと判定できるようにする。
@@ -161,7 +170,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
 
         //favoriteListの作成
-        favoriteAnswerList=new ArrayList();
+        //favoriteAnswerList=new ArrayList();
         //FirebaseからReferenceを取得
         DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
         //ログイン済みのユーザーを取得
@@ -227,7 +236,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
             DatabaseReference favoriteRef=databaseReference.child(Const.UsersPATH).child(user.getUid()).child(Const.FavoritePATH);
             DatabaseReference testRef=databaseReference.child(Const.UsersPATH);
 
-            //favoriteAnswerList内に該当するQuestionUidがあるかどうかを確認
+            /*
             boolean test=true;
             String deleteAnswerUid="";
             for(int i=0;i<favoriteAnswerList.size();i++){
@@ -238,8 +247,25 @@ public class QuestionDetailActivity extends AppCompatActivity {
                     test=false;
                 }
             }
+            */
+            //お気に入りに入っているか田舎の判別用のArrayListを削除した。
+            //ボタンにつけられているタグでお気に入りの質問か否かを判別する。
+            if(favoriteButton.getTag().toString().equals("1")){
+                //tag:1の場合お気に入りの質問
+                //行う動作：お気に入りから除外
+                NowRef.removeValue();
+                favoriteButton.setText("お気に入り");
+                favoriteButton.setTag(0);
+            }else{
+                //tag:0(1以外）の場合お気に入りの質問でない
+                //行う動作：お気に入りに追加
+                //favoriteRef.addChildEventListener(mFavoriteEventListener);
+                favoriteRef.push().setValue(favoriteAnswer);
+            }
+
             //testがtrueの場合はお気に入りに追加、falseの場合はお気に入りから除外する。
             //(Firebaseのデータから）
+            /*
             if(test) {
                 favoriteAnswerList.clear();
                 //if(favoriteAnswerList.size()!=0) {
@@ -254,6 +280,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 favoriteRef.removeEventListener(mFavoriteEventListener);
                 favoriteRef.child(deleteAnswerUid).removeValue();
             }
+            */
         }
     };
 }
