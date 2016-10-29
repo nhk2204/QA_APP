@@ -40,6 +40,110 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
 
+    //FavoriteからArrayListを作成
+    private ArrayList<String> mFavoriteQuestionArrayList=new ArrayList<String>();
+    //とにかく動かすためにbooleanで対処
+    //private boolean flagA;
+    //とにかく動かすためにintを作成
+    private int NowGenre;
+
+    //ChildEventListenerの呼び出されるタイミングがよくわからないのでかなり面倒くさい処理を行っている。
+    //動かした感じの想像だが、おそらくだが「DatabaseReferenceが更新された後、メソッドの終わりに1度だけ呼ばれる」と思われる。
+    private ChildEventListener mFavoriteListenerMainEx=new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            //ほぼmEventListenerのコピペ。
+            //異なる箇所はmFavoriteQuestionArrayListにより項目を振り分ける点。
+            //QuestionクラスとAnswerクラスを作成しArrayListに追加する。
+            if(mFavoriteQuestionArrayList.size()!=0) {
+                for (int i = 0; i < mFavoriteQuestionArrayList.size(); i++) {
+                    if (("{favoriteAnswer="+dataSnapshot.getRef().toString()+"}").equals(mFavoriteQuestionArrayList.get(i))) {
+                        HashMap map = (HashMap) dataSnapshot.getValue();
+                        String title = (String) map.get("title");
+                        String body = (String) map.get("body");
+                        String name = (String) map.get("name");
+                        String uid = (String) map.get("uid");
+                        String imageString = (String) map.get("image");
+                        Bitmap image = null;
+                        byte[] bytes;
+                        if (imageString != null) {
+                            BitmapFactory.Options options = new BitmapFactory.Options();
+                            bytes = Base64.decode(imageString, Base64.DEFAULT);
+                        } else {
+                            bytes = new byte[0];
+                        }
+
+                        ArrayList<Answer> answerArrayList = new ArrayList<Answer>();
+                        HashMap answerMap = (HashMap) map.get("answer");
+                        if (answerMap != null) {
+                            for (Object key : answerMap.keySet()) {
+                                HashMap temp = (HashMap) answerMap.get((String) key);
+                                String answerBody = (String) temp.get("body");
+                                String answerName = (String) temp.get("name");
+                                String answerUid = (String) temp.get("uid");
+                                Answer answer = new Answer(answerBody, answerName, answerUid, (String) key);
+                                answerArrayList.add(answer);
+                            }
+                        }
+
+                        Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
+                        mQuestionArrayList.add(question);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+            if(NowGenre<4) {
+                NowGenre += 1;
+                mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(NowGenre));
+                mGenreRef.addChildEventListener(mFavoriteListenerMainEx);
+            }
+        }
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+        }
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+        }
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+        }
+    };
+
+    //mQuestionArrayListを作成する。
+    private ChildEventListener mFavoriteListenerMain=new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            mFavoriteQuestionArrayList.clear();
+            for( DataSnapshot snapshot: dataSnapshot.getChildren() )
+            {
+                mFavoriteQuestionArrayList.add(snapshot.getValue().toString());
+            }
+            if(mGenreRef!=null){
+                //データの初期化
+                mGenreRef.removeEventListener(mEventListener);
+                mGenreRef.removeEventListener(mFavoriteListenerMain);
+            }
+            NowGenre=1;
+            mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(NowGenre));
+            mGenreRef.addChildEventListener(mFavoriteListenerMainEx);
+        }
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+        }
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+        }
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+        }
+    };
+
     private ChildEventListener mEventListener= new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -127,6 +231,9 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
+        //NowGenreの初期化
+        NowGenre=999;
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -177,6 +284,9 @@ public class MainActivity extends AppCompatActivity {
                 }else if(id==R.id.nav_computre){
                     mToolbar.setTitle("コンピューター");
                     mGenre=4;
+                }else{
+                    mToolbar.setTitle("お気に入り");
+                    mGenre=5;
                 }
 
                 DrawerLayout drawer=(DrawerLayout)findViewById(R.id.drawer_layout);
@@ -191,13 +301,38 @@ public class MainActivity extends AppCompatActivity {
                 if(mGenreRef!=null){
                     //データの初期化
                     mGenreRef.removeEventListener(mEventListener);
+                    mGenreRef.removeEventListener(mFavoriteListenerMain);
+                    //mFavoriteQuestionArrayList.clear();
                 }
-                //データベースのルートを示している。
-                //持ってくる場所をセット。mGenreRefに場所を登録
-                mGenreRef=mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
-                //データを持ってくるよう命ずる。
-                mGenreRef.addChildEventListener(mEventListener);
 
+                //お気に入りを呼び出したときとそれ以外のときとで場合わけ。
+                if(mGenre==5){
+                    //お気に入りが保存してある場所を開く
+                    //FirebaseからReferenceを取得
+                    DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
+                    //ログイン済みのユーザーを取得
+                    FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+                    mGenreRef=databaseReference.child(Const.UsersPATH).child(user.getUid());//.child(Const.FavoritePATH);
+                    mGenreRef.addChildEventListener(mFavoriteListenerMain);
+                    //flagA=true;
+                    /*
+                    for(int i=1;i<5;i++) {
+                        if(mGenreRef!=null){
+                            //データの初期化
+                            mGenreRef.removeEventListener(mEventListener);
+                            mGenreRef.removeEventListener(mFavoriteListenerMain);
+                        }
+                        mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(1));
+                        mGenreRef.addChildEventListener(mFavoriteListenerMainEx);
+                    }
+                    */
+                }else {
+                    //データベースのルートを示している。
+                    //持ってくる場所をセット。mGenreRefに場所を登録
+                    mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
+                    //データを持ってくるよう命ずる。
+                    mGenreRef.addChildEventListener(mEventListener);
+                }
                 return true;
             }
         });

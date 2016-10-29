@@ -37,6 +37,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
     //String NowRef : お気に入りのRefを直接代入する
     private DatabaseReference NowRef;
 
+    //質問自体のRefを保存する。
+    //コレ自体を比較することでお気に入りか否かの判別を行い、MainActivityにてお気に入りリストを作成する場合も
+    //コレを用いて直接呼び出す。
+    private DatabaseReference NowQuestionRef;
+
     private ChildEventListener mEventListener=new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -93,7 +98,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 favoriteButton=(Button)findViewById(R.id.favoriteButton);
                 System.out.println("There are " + snapshot.getRef().toString() + " : getRef()");
                 // 選択された質問がお気に入りに追加されていた場合
-                if( mQuestion.getQuestionUid().equals(snapshot.getValue()))
+                if( NowQuestionRef.toString().equals(snapshot.getValue()))
                 {
                     /*
                     System.out.println("There are " + snapshot.getValue().toString() + " : getValue()");
@@ -213,7 +218,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
         //よくわからない集団。
         DatabaseReference dataBaseReference= FirebaseDatabase.getInstance().getReference();
-        //↓2行が復活する。意味は？
+        NowQuestionRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid());
+        //↓2行が復活する。意味はanswerを表示すること。
         mAnswerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
         //DatabaseReference testRef=dataBaseReference.child(Const.UsersPATH);
@@ -230,11 +236,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
             //現在の質問のuidを取得しHashMapに放り込む
             Map<String,String> favoriteAnswer=new HashMap<String,String>();
-            favoriteAnswer.put("favoriteAnswer",mQuestion.getQuestionUid());
+            favoriteAnswer.put("favoriteAnswer",NowQuestionRef.toString());
 
             //ログイン済みユーザーのfavoriteスペースを指定
             DatabaseReference favoriteRef=databaseReference.child(Const.UsersPATH).child(user.getUid()).child(Const.FavoritePATH);
-            DatabaseReference testRef=databaseReference.child(Const.UsersPATH);
+            //DatabaseReference testRef=databaseReference.child(Const.UsersPATH);
 
             /*
             boolean test=true;
