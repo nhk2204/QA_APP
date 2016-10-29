@@ -71,11 +71,44 @@ public class QuestionDetailActivity extends AppCompatActivity {
         }
     };
 
+    //-------------------------------------------------------ここまで同じ
+
+    //mFavoriteEventListenerの内容がかなり変更されている。
     private ChildEventListener mFavoriteEventListener=new ChildEventListener() {
         //onCreateする際に呼ばれます。
-        //ArrayListの中にFavoriteAnswerを挿入します。
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            //お気に入りの数を数えていることを確認する。
+            System.out.println("There are " + dataSnapshot.getChildrenCount() + " favorites posts");
+
+            // お気に入りの数分、下記の処理を実行する
+            //dataSnapshot.getChildren()ができるなら、dataSnapshotのidを引っ張ることもできるのではないだろうか・・・？
+            for( DataSnapshot snapshot: dataSnapshot.getChildren() )
+            {
+                favoriteButton=(Button)findViewById(R.id.favoriteButton);
+                // 選択された質問がお気に入りに追加されていた場合
+                if( mQuestion.getQuestionUid().equals(snapshot.getValue()))
+                {
+                    System.out.println("There are " + snapshot.getValue() + " : getValue()");
+                    System.out.println("There are " + snapshot.getKey() + " : getKey()");
+                    System.out.println("There are " + snapshot.toString() + " : toString()");
+
+                    // お気に入りボタンの状態を変更
+                    favoriteButton.setText("お気に入り（済み）");
+                    // お気に入りボタンにタグを１（何でも構わない）とし、登録済みと判定できるようにする。
+                    favoriteButton.setTag(1);
+                    // 選択された質問がお気に入りに追加されていない場合
+                } else {
+                    favoriteButton.setText("お気に入り");
+                    favoriteButton.setTag(0);
+                }
+                //お気に入りボタンを押した際の条件分岐はタグで判断する。
+                //タグとは？
+            }
+
+            //favoriteAnswerList(ArrayList)でお気に入りの質問をリストアップし覚えておくのではなく、
+            //質問ごとにFirebaseから直接情報のやり取りを行う。
+/*
             HashMap favoriteAnswerMap=(HashMap)dataSnapshot.getValue();
             //HashMap favoriteAnswerMap=(HashMap)map.get("favorite");
             favoriteQuestion favoriteQuestion=new favoriteQuestion();
@@ -89,6 +122,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
                     favoriteAnswerList.add(favoriteQuestion);
                 }
             }
+*/
         }
 
         @Override
@@ -139,9 +173,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
         //favoriteRef.addChildEventListener(mFavoriteEventListener);
         //誤作動をしないようmFavoriteListenerを忘れずにはずす。
         //if(favoriteAnswerList.size()!=0) {
-            //favoriteRef.removeEventListener(mFavoriteEventListener);
+        //favoriteRef.removeEventListener(mFavoriteEventListener);
         //}else{
-            favoriteRef.addChildEventListener(mFavoriteEventListener);
+        favoriteRef.addChildEventListener(mFavoriteEventListener);
         //}
 
         //favoriteButtonの準備
@@ -169,8 +203,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
         });
 
         //よくわからない集団。
-        //DatabaseReference dataBaseReference= FirebaseDatabase.getInstance().getReference();
-        //mAnswerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
+        DatabaseReference dataBaseReference= FirebaseDatabase.getInstance().getReference();
+        //↓2行が復活する。意味は？
+        mAnswerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
         //DatabaseReference testRef=dataBaseReference.child(Const.UsersPATH);
         //testRef.addChildEventListener(mFavoriteEventListener);
@@ -208,9 +243,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
             if(test) {
                 favoriteAnswerList.clear();
                 //if(favoriteAnswerList.size()!=0) {
-                    //favoriteRef.removeEventListener(mFavoriteEventListener);
+                //favoriteRef.removeEventListener(mFavoriteEventListener);
                 //}else{
-                    favoriteRef.addChildEventListener(mFavoriteEventListener);
+                favoriteRef.addChildEventListener(mFavoriteEventListener);
                 //}
                 favoriteRef.push().setValue(favoriteAnswer);
                 //favoriteRef.addChildEventListener(mFavoriteEventListener);
