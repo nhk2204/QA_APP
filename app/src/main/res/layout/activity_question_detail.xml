@@ -21,6 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/favoriteButton"
+        android:tag="0"
         android:text="お気に入り"/>
 
     <android.support.design.widget.FloatingActionButton

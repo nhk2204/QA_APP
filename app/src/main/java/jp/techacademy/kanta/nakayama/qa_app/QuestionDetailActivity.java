@@ -105,11 +105,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
                     // お気に入りボタンの状態を変更
                     favoriteButton.setText("お気に入り（済み）");
                     // お気に入りボタンにタグを１（何でも構わない）とし、登録済みと判定できるようにする。
-                    favoriteButton.setTag(1);
+                    favoriteButton.setTag("1");
                     // 選択された質問がお気に入りに追加されていない場合
                 } else {
                     favoriteButton.setText("お気に入り");
-                    favoriteButton.setTag(0);
+                    favoriteButton.setTag("0");
                 }
                 //お気に入りボタンを押した際の条件分岐はタグで判断する。
                 //タグとは？
@@ -255,7 +255,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 //行う動作：お気に入りから除外
                 NowRef.removeValue();
                 favoriteButton.setText("お気に入り");
-                favoriteButton.setTag(0);
+                favoriteButton.setTag("0");
             }else{
                 //tag:0(1以外）の場合お気に入りの質問でない
                 //行う動作：お気に入りに追加
