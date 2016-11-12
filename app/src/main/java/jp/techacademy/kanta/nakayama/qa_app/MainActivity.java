@@ -73,8 +73,15 @@ public class MainActivity extends AppCompatActivity {
                             bytes = new byte[0];
                         }
 
+                        /*
+                        何故使用できなくなったのかは皆目見当がつかないが、HashMap answerMap=(HashMap)Map.get("answers")が
+                        必ずnullになるという気違い仕様。今までできていたことができなくなるのは何故なのか？
+                        本当に理解できない。
+                        HashMap answerMap = (HashMap) map.get("answers");
+                        ↑この文章はとても理にかなっているように感じるが、Androidはどういう風に解釈しているのか、理解を示さないようである。実に不思議である。
+                        */
                         ArrayList<Answer> answerArrayList = new ArrayList<Answer>();
-                        HashMap answerMap = (HashMap) map.get("answer");
+                        HashMap answerMap = (HashMap) map.get("answers");
                         if (answerMap != null) {
                             for (Object key : answerMap.keySet()) {
                                 HashMap temp = (HashMap) answerMap.get((String) key);
@@ -168,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             ArrayList<Answer> answerArrayList=new ArrayList<Answer>();
-            HashMap answerMap=(HashMap)map.get("answer");
+            HashMap answerMap=(HashMap)map.get("answers");
             if(answerMap!=null){
                 for(Object key:answerMap.keySet()){
                     HashMap temp=(HashMap)answerMap.get((String)key);
