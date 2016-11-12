@@ -79,6 +79,10 @@ public class MainActivity extends AppCompatActivity {
                         本当に理解できない。
                         HashMap answerMap = (HashMap) map.get("answers");
                         ↑この文章はとても理にかなっているように感じるが、Androidはどういう風に解釈しているのか、理解を示さないようである。実に不思議である。
+
+                        追記：
+                        なぜか文章をまったく変更していないにもかかわらず正しく動くようになった。
+                        まさに意味不明、奇奇怪怪という言葉がよく似合う。つまり今までできるのにやっていなかったわけだ。
                         */
                         ArrayList<Answer> answerArrayList = new ArrayList<Answer>();
                         HashMap answerMap = (HashMap) map.get("answers");
@@ -105,10 +109,47 @@ public class MainActivity extends AppCompatActivity {
                 NowGenre += 1;
                 mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(NowGenre));
                 mGenreRef.addChildEventListener(mFavoriteListenerMainEx);
+
+                //お気に入り画面だけ違う動作をするので、お気に入り画面だけ違う動作をさせている部分を削除してみようと思い、
+                //以下の分岐を作成。
+                //お気に入りを作成後mEventListenerが作動する。
+                //が、コレによって何が変わるかといわれるとまったく分からない。
+
+                //追記：当てが外れたので削除。
+                //onChildChangedにmAdapterが振り分けられていないのが原因ではないだろうか？
+                //}else{
+                //mGenreRef.addChildEventListener(mEventListener);
             }
         }
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            //とりあえずそのままコピペ（mEventListenerから）。
+            //コレで大丈夫なのだろうか・・・？
+
+            //要素に変化があった際に呼ばれる。
+            //今回は質問に対して回答が投稿されたときに呼ばれます。
+            //Questionクラスのインスタンスが保持している回答のArrayListを一回クリアし取得した回答を設定する。
+            HashMap map=(HashMap)dataSnapshot.getValue();
+
+            //変更があったQuestionを探す
+            for(Question question:mQuestionArrayList){
+                if(dataSnapshot.getKey().equals(question.getQuestionUid())){
+                    //このアプリで変更がある可能性があるのは回答(Answer)のみ
+                    question.getAnswers().clear();
+                    HashMap answerMap=(HashMap)map.get("answers");
+                    if(answerMap!=null){
+                        for(Object key:answerMap.keySet()){
+                            HashMap temp=(HashMap)answerMap.get((String)key);
+                            String answerBody=(String)temp.get("body");
+                            String answerName=(String)temp.get("name");
+                            String answerUid=(String)temp.get("uid");
+                            Answer answer=new Answer(answerBody,answerName,answerUid,(String)key);
+                            question.getAnswers().add(answer);
+                        }
+                    }
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
         }
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
@@ -194,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            //要素に変化があった再に呼ばれる。
+            //要素に変化があった際に呼ばれる。
             //今回は質問に対して回答が投稿されたときに呼ばれます。
             //Questionクラスのインスタンスが保持している回答のArrayListを一回クリアし取得した回答を設定する。
             HashMap map=(HashMap)dataSnapshot.getValue();
@@ -250,6 +291,9 @@ public class MainActivity extends AppCompatActivity {
                 //ジャンルを選択していない場合(mGenre==0)はエラーを表示する
                 if(mGenre==0){
                     Snackbar.make(view,"ジャンルを選択してください",Snackbar.LENGTH_LONG).show();
+                    return;
+                }else if(mGenre==5){
+                    Snackbar.make(view,"お気に入り画面で質問の作成はできません",Snackbar.LENGTH_LONG).show();
                     return;
                 }
                 //ログイン済みのユーザーを収録する

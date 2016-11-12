@@ -158,6 +158,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 }
             }
 */
+            //下記３行をmFavoriteEventListener内に記述してみる。
+            //どんな場合もmEventListenerを発動させることで状況をそろえてみる。
+            DatabaseReference dataBaseReference= FirebaseDatabase.getInstance().getReference();
+            mAnswerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
+            mAnswerRef.addChildEventListener(mEventListener);
         }
 
         @Override
@@ -241,8 +246,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
         DatabaseReference dataBaseReference= FirebaseDatabase.getInstance().getReference();
         NowQuestionRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid());
         //↓2行が復活する。意味はanswerを表示すること。
-        mAnswerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
-        mAnswerRef.addChildEventListener(mEventListener);
+        //mAnswerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
+        //mAnswerRef.addChildEventListener(mEventListener);
         //DatabaseReference testRef=dataBaseReference.child(Const.UsersPATH);
         //testRef.addChildEventListener(mFavoriteEventListener);
 
