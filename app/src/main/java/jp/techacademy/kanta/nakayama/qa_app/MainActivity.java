@@ -99,7 +99,23 @@ public class MainActivity extends AppCompatActivity {
 
                         //Questionの引数のGenreをNowGenreに変更
                         //コレするくらいならGenreをそもそも更新したほうがいい気もする・・・
-                        Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), NowGenre, bytes, answerArrayList);
+                        //Genreを999にする。
+                        //質問を書き込む際はQuestionUidから探させることにする。
+
+                        //かなり無理やりGenreをそろえることにする。
+                        String snapshotRef;
+                        String snapshotKey;
+                        int EndPoint;
+                        snapshotRef=dataSnapshot.getRef().toString();
+                        snapshotKey=dataSnapshot.getKey();
+                        EndPoint=snapshotRef.indexOf(snapshotKey);
+
+                        int ThisGenre;
+                        ThisGenre=Integer.parseInt(snapshotRef.substring(EndPoint-2,EndPoint-1));
+                        //ここまでGenreをそろえる動作。
+                        //Genreの数が2桁になると割と面倒くさい変換が必要になる気がするがとりあえず"無視"を決め込む！！
+
+                        Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), ThisGenre, bytes, answerArrayList);
                         mQuestionArrayList.add(question);
                         mAdapter.notifyDataSetChanged();
                     }

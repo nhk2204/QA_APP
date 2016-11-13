@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -61,29 +63,53 @@ public class AnswerSendActivity extends AppCompatActivity implements View.OnClic
         im.hideSoftInputFromWindow(v.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
 
         DatabaseReference dataBaseReference= FirebaseDatabase.getInstance().getReference();
-        DatabaseReference answerRef=dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
 
-        Map<String,String> data=new HashMap<String,String>();
+            DatabaseReference answerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
 
-        //UID
-        data.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+            Map<String, String> data = new HashMap<String, String>();
 
-        //表示名
-        //Preferenceから名前を取る
-        SharedPreferences sp= PreferenceManager.getDefaultSharedPreferences(this);
-        String name=sp.getString(Const.NameKEY,"");
-        data.put("name",name);
+            //UID
+            data.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
 
-        //回答を取得する
-        String answer=mAnswerEditText.getText().toString();
-        if(answer.length()==0){
-            //回答が入力されていないときはエラーを表示する
-            Snackbar.make(v,"回答を入力してください",Snackbar.LENGTH_LONG).show();
-            return;
-        }
-        data.put("body",answer);
+            //表示名
+            //Preferenceから名前を取る
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+            String name = sp.getString(Const.NameKEY, "");
+            data.put("name", name);
 
-        mProgress.show();
-        answerRef.push().setValue(data,this);
+            //回答を取得する
+            String answer = mAnswerEditText.getText().toString();
+            if (answer.length() == 0) {
+                //回答が入力されていないときはエラーを表示する
+                Snackbar.make(v, "回答を入力してください", Snackbar.LENGTH_LONG).show();
+                return;
+            }
+            data.put("body", answer);
+
+            mProgress.show();
+            answerRef.push().setValue(data, this);
     }
+
+    //該当のQuestionを探すためだけのEventListener
+    private ChildEventListener mFavoriteListenerExtra=new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            for( DataSnapshot snapshot: dataSnapshot.getChildren() ) {
+                
+            }
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+        }
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+        }
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+        }
+    };
 }
