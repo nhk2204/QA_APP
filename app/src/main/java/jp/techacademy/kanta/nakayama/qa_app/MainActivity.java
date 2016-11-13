@@ -125,6 +125,34 @@ public class MainActivity extends AppCompatActivity {
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
             //とりあえずそのままコピペ（mEventListenerから）。
             //コレで大丈夫なのだろうか・・・？
+            //↑だめfavoriteをチェックし必要に応じて削除する命令を作成する必要がある。
+
+            /*
+            //そんなわけで、リストの作成から最初からやり直す方式に変更。
+            //めんどくさいことを多々行うが、おそらくコレが確実であると思う。
+            ↑
+            想像以上に頭の悪い解釈をされたので削除。
+            なるほどと感心するほどに一番都合の悪い解釈である。
+            （ListViewのクリアがなされないためListが長くなる。
+            また、お気に入りのチェック項目はfirebaseの質問欄の更新を行っていないため
+            Firebaseの更新とみなされないらしくお気に入りが外れたことに対するアクションがなされない。
+            実に最悪である。考えうる限り最も都合の悪い解釈をなされている。Firebase様は賢くあらせられる。）
+
+            //選択したジャンルのデータをクローズして再度ジャンルを読み込む準備をする。
+            if(mGenreRef!=null){
+                //データの初期化
+                mGenreRef.removeEventListener(mEventListener);
+                mGenreRef.removeEventListener(mFavoriteListenerMain);
+                //mFavoriteQuestionArrayList.clear();
+            }
+            //お気に入りが保存してある場所を開く
+            //FirebaseからReferenceを取得
+            DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
+            //ログイン済みのユーザーを取得
+            FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+            mGenreRef=databaseReference.child(Const.UsersPATH).child(user.getUid());//.child(Const.FavoritePATH);
+            mGenreRef.addChildEventListener(mFavoriteListenerMain);
+            */
 
             //要素に変化があった際に呼ばれる。
             //今回は質問に対して回答が投稿されたときに呼ばれます。

@@ -104,7 +104,19 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 favoriteButton=(Button)findViewById(R.id.favoriteButton);
                 System.out.println("There are " + snapshot.getRef().toString() + " : getRef()");
                 // 選択された質問がお気に入りに追加されていた場合
+                /*
+                どうにもうまいやり方が見つからないので部分一致で乗り切る。
+                NowGenreが完全に意味を失う瞬間である（笑）
+                こんなゴミは最早いらない（笑）
                 if( NowQuestionRef.toString().equals(snapshot.getValue()))
+                */
+
+                //お気に入りかどうかを判別するため、非常に使いにくいsnapshotとかいうゴミクズをわざわざStringに修正してやる
+                String snapshotValue;
+                snapshotValue=snapshot.getValue().toString();
+                String mQuestionUid;
+                mQuestionUid=mQuestion.getQuestionUid();
+                if(snapshotValue.indexOf(mQuestionUid)!=-1)
                 {
                     /*
                     System.out.println("There are " + snapshot.getValue().toString() + " : getValue()");
