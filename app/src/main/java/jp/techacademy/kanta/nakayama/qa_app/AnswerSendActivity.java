@@ -90,6 +90,9 @@ public class AnswerSendActivity extends AppCompatActivity implements View.OnClic
             answerRef.push().setValue(data, this);
     }
 
+    /*
+    必要なくなったので削除。
+    この画面を動かしたときにMainActivityのお気に入り項目の削除を行うようにすべき？？
     //該当のQuestionを探すためだけのEventListener
     private ChildEventListener mFavoriteListenerExtra=new ChildEventListener() {
         @Override
@@ -112,4 +115,5 @@ public class AnswerSendActivity extends AppCompatActivity implements View.OnClic
         public void onCancelled(DatabaseError databaseError) {
         }
     };
+    */
 }

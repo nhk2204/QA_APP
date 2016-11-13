@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                         //Genreを999にする。
                         //質問を書き込む際はQuestionUidから探させることにする。
 
-                        //かなり無理やりGenreをそろえることにする。
+                        //無理やりGenreをそろえることにする。
                         String snapshotRef;
                         String snapshotKey;
                         int EndPoint;
@@ -176,9 +176,15 @@ public class MainActivity extends AppCompatActivity {
             HashMap map=(HashMap)dataSnapshot.getValue();
 
             //変更があったQuestionを探す
+            //AnswerSendActivity画面で回答を投稿した際に動いている。何故？？？
             for(Question question:mQuestionArrayList){
+
+                //よくよく考えたらここでする必要なくないか？
+                //boolean favoriteCheck;
+                //favoriteCheck=false;
+
                 if(dataSnapshot.getKey().equals(question.getQuestionUid())){
-                    //このアプリで変更がある可能性があるのは回答(Answer)のみ
+                    //回答(Answer)の変更チェックを行う。
                     question.getAnswers().clear();
                     HashMap answerMap=(HashMap)map.get("answers");
                     if(answerMap!=null){
@@ -191,18 +197,38 @@ public class MainActivity extends AppCompatActivity {
                             question.getAnswers().add(answer);
                         }
                     }
+                    //favoriteCheck=true;
                     mAdapter.notifyDataSetChanged();
                 }
+
+                /*
+                チェックをはずしたときに動かすべき（？）
+                if(favoriteCheck==false){
+                    mAdapter.notifyDataSetChanged();
+                }
+                */
             }
         }
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
+            //削除されたときに更新を行う（？）
+            //よく分からんけどメニューからお気に入りを選んだ際に動く
+            //mAdapter.notifyDataSetChanged();
+
+            //HashMap map=(HashMap)dataSnapshot.getValue();
+
         }
         @Override
         public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            //削除されたときに更新を行う（？）
+            //よく分からんけどメニューからお気に入りを選んだ際に動く
+            //mAdapter.notifyDataSetChanged();
         }
         @Override
         public void onCancelled(DatabaseError databaseError) {
+            //削除されたときに更新を行う（？）
+            //よく分からんけどメニューからお気に入りを選んだ際に動く
+            //mAdapter.notifyDataSetChanged();
         }
     };
 
